@@ -22,10 +22,15 @@ rh.login(uid, pid)
 
 #%%
 
-# check if file/path already exists
-#export_orders=rh.export.export_completed_stock_orders('./')
+del uid
+del pid
+del lins
 
-df_orders=pd.read_csv('./stock_orders_Jul-11-2021.csv')
+#%%
+# check if file/path already exists
+#export_orders=rh.export.export_completed_crypto_orders('./')
+
+df_orders=pd.read_csv('./crypto_orders_Jul-11-2021.csv')
 df_orders.sort_values('date',inplace=True)
 df_orders.reset_index(inplace=True, drop=True)   #tz = UTC on data import
 
@@ -33,12 +38,8 @@ df_orders.reset_index(inplace=True, drop=True)   #tz = UTC on data import
 
 df_plotter=pd.DataFrame()
 
-for sym_loop in ['AAPL','AMZN','KLAC','AMAT']:#df_orders.symbol:
-
-    fundy=rh.get_fundamentals([sym_loop])[0]
-    sym_sector=fundy['sector']   
-    sym_indust=fundy['industry']
-    print(sym_sector, sym_indust)
+for sym_loop in ['ETHUSD','BTCUSD']:#df_orders.symbol:
+    print(sym_loop)
     
     df_sub_test = df_orders[df_orders.symbol==sym_loop].sort_values('date')
     df_sub_test.reset_index(inplace=True,drop=True)
@@ -57,7 +58,7 @@ for sym_loop in ['AAPL','AMZN','KLAC','AMAT']:#df_orders.symbol:
     df_sub_test.drop(axis=1, columns='date',inplace=True)
 
 
-    list_history=rh.get_stock_historicals([sym_loop],interval='day',span='year')
+    list_history=rh.get_crypto_historicals([sym_loop.split('USD')[0]],interval='day',span='year')
     df_history=pd.DataFrame(list_history, dtype=float)
     df_history.set_index(pd.to_datetime(df_history['begins_at'])+pd.Timedelta(value=12.75, unit='hours'),inplace=True, drop=True)
     df_history.insert(loc=5, column='mid_price', value=0.5*(df_history.open_price+df_history.close_price))
@@ -88,38 +89,28 @@ for sym_loop in ['AAPL','AMZN','KLAC','AMAT']:#df_orders.symbol:
     
 #    df_plotter.append(df_final['PL_percentage'])
 #    df_plotter=pd.concat([df_plotter,df_final['PL_percentage']],axis=1,names=sym_loop)
-#%%
 
-for sym_loop in df_orders.symbol:
-    print(sym_loop)
+
+#for sym_loop in df_orders.symbol:
+#    print(sym_loop)
     df_temp=df_final[df_final['symbol']==sym_loop]
-    plt.scatter(df_temp.index.values, df_temp.PL_percentage.values, ec='black', s=20)
-    plt.ylim(-80,80)
+    plt.scatter(df_temp.index.values, df_temp.PL_percentage.values, ec='black', s=1e4*df_temp.outst_shares,alpha=0.8)
+    plt.plot(df_temp.index.values, df_temp.PL_percentage.values, linestyle='-', color=(0.2,0.2,0.2))
+    plt.ylim(-40,140)
 #    plt.xlim(df_final.index.values[121],df_final.index.values[-1])
-    xmin=pd.to_datetime(dt.datetime(2020, 12, 31, 23, 59, 0))
-    xmax=pd.to_datetime(dt.datetime(2022, 1, 1, 0, 1, 0))
+    xmin=pd.to_datetime(dt.datetime(2021, 2, 28, 23, 59, 0))
+    xmax=pd.to_datetime(dt.datetime(2021, 9, 1, 0, 1, 0))
+    plt.plot([xmin,xmax],[0.,0.],color='black',linestyle='--')
     plt.xlim(xmin,xmax)
 
 plt.show()
 
-#%%
-
-print(df_final.index[122])
 
 
+#list_test=rh.get_crypto_historicals(['LTC'],interval='day',span='year')
 
 
-
-#%%
-fundy_sym=rh.get_fundamentals(['AMAT'])
-x_dict = fundy_sym[0]
-print(x_dict['sector'])
-
-
-
-
-
-
+x='LTCUSD'.split('USD')[0]
 
 
 
